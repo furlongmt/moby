@@ -71,6 +71,12 @@ type commitBackend interface {
 	CreateImageFromContainer(name string, config *backend.CreateImageConfig) (imageID string, err error)
 }
 
+// MATT ADDED THIS
+type migrateBackend interface {
+	StartIter(ctx context.Context, containerID string) (container.IterBody, error)
+	StopIter(ctx context.Context, containerID string) (container.IterBody, error)
+}
+
 // Backend is all the methods that need to be implemented to provide container specific functionality.
 type Backend interface {
 	commitBackend
@@ -80,4 +86,6 @@ type Backend interface {
 	monitorBackend
 	attachBackend
 	systemBackend
+	// MATT ADDED THIS
+	migrateBackend
 }

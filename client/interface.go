@@ -24,6 +24,8 @@ type CommonAPIClient interface {
 	ContainerAPIClient
 	DistributionAPIClient
 	ImageAPIClient
+	// MATT ADDED THIS
+	MigrateAPIClient
 	NodeAPIClient
 	NetworkAPIClient
 	PluginAPIClient
@@ -196,4 +198,10 @@ type ConfigAPIClient interface {
 	ConfigRemove(ctx context.Context, id string) error
 	ConfigInspectWithRaw(ctx context.Context, name string) (swarm.Config, []byte, error)
 	ConfigUpdate(ctx context.Context, id string, version swarm.Version, config swarm.ConfigSpec) error
+}
+
+// MATT ADDED THIS
+type MigrateAPIClient interface {
+	StartIter(ctx context.Context, containerID string)
+	StopIter(ctx context.Context, containerID string)
 }
