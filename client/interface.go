@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	containertypes "github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/events"
 	"github.com/docker/docker/api/types/filters"
@@ -202,6 +203,6 @@ type ConfigAPIClient interface {
 
 // MATT ADDED THIS
 type MigrateAPIClient interface {
-	StartIter(ctx context.Context, containerID string)
-	StopIter(ctx context.Context, containerID string)
+	StartIter(ctx context.Context, containerID string) (container.IterBody, error)
+	StopIter(ctx context.Context, containerID string) (container.IterBody, error)
 }
