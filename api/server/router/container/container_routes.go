@@ -667,3 +667,13 @@ func (s *containerRouter) postContainersPrune(ctx context.Context, w http.Respon
 	}
 	return httputils.WriteJSON(w, http.StatusOK, pruneReport)
 }
+
+func (s *containerRouter) createPageServer(ctx context.Context, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
+
+	pageServer, err := s.backend.CreatePageServer(ctx, vars["name"])
+	if err != nil {
+		return err
+	}
+
+	return httputils.WriteJSON(w, http.StatusOK, pageServer)
+}

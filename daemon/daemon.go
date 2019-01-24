@@ -42,6 +42,7 @@ import (
 	"github.com/moby/buildkit/util/resolver"
 	"github.com/moby/buildkit/util/tracing"
 	"github.com/sirupsen/logrus"
+
 	// register graph drivers
 	_ "github.com/docker/docker/daemon/graphdriver/register"
 	"github.com/docker/docker/daemon/stats"
@@ -67,6 +68,9 @@ import (
 	nwconfig "github.com/docker/libnetwork/config"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/semaphore"
+
+	// MATT ADDED THIS
+	"github.com/checkpoint-restore/go-criu/phaul"
 )
 
 // ContainersNamespace is the name of the namespace used for users containers
@@ -120,6 +124,7 @@ type Daemon struct {
 	diskUsageRunning int32
 	pruneRunning     int32
 	hosts            map[string]bool // hosts stores the addresses the daemon is listening on
+	pageServers      map[string]*phaul.Server
 	startupDone      chan struct{}
 
 	attachmentStore       network.AttachmentStore

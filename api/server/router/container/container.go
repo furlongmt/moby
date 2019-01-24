@@ -33,6 +33,10 @@ func (r *containerRouter) initRoutes() {
 		// HEAD
 		router.NewHeadRoute("/containers/{name:.*}/archive", r.headContainersArchive),
 		// GET
+		// MATT ADDED THIS
+		//router.NewPostRoute("/containers/{name:.*}/startiter",
+		router.NewGetRoute("/containers/{name:.*}/createpageserver", r.createPageServer),
+
 		router.NewGetRoute("/containers/json", r.getContainersJSON),
 		router.NewGetRoute("/containers/{name:.*}/export", r.getContainersExport),
 		router.NewGetRoute("/containers/{name:.*}/changes", r.getContainersChanges),
@@ -62,8 +66,6 @@ func (r *containerRouter) initRoutes() {
 		router.NewPostRoute("/containers/{name:.*}/update", r.postContainerUpdate),
 		router.NewPostRoute("/containers/prune", r.postContainersPrune),
 		router.NewPostRoute("/commit", r.postCommit),
-		// MATT ADDED THIS
-		//router.NewPostRoute("/containers/{name:.*}/startiter",
 		// PUT
 		router.NewPutRoute("/containers/{name:.*}/archive", r.putContainersArchive),
 		// DELETE

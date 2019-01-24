@@ -73,6 +73,7 @@ type commitBackend interface {
 
 // MATT ADDED THIS
 type migrateBackend interface {
+	CreatePageServer(ctx context.Context, containerID string) (container.CreatePageServerBody, error)
 	StartIter(ctx context.Context, containerID string) (container.IterBody, error)
 	StopIter(ctx context.Context, containerID string) (container.IterBody, error)
 }
