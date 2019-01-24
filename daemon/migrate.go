@@ -11,6 +11,7 @@ import (
 	"github.com/checkpoint-restore/go-criu/phaul"
 	"github.com/docker/docker/api/types/container"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 // TODO: make sure it's not a unix socket...
@@ -32,31 +33,26 @@ func (daemon *Daemon) CreatePageServer(ctx context.Context, containerID string) 
 	port := uint32(6245)
 	wdir, err := ioutil.TempDir("", "ctrd-pageserver-workdir")
 	if err != nil {
-		fmt.Println("Failed to create tmp dir")
+		logrus.Error("Failed to crate tmp dir for page server")
 		return container.CreatePageServerBody{}, err
 	}
 
-	for k, v := range daemon.hosts {
-		fmt.Println("k:", k, "v:", v)
-	}
-
-	host, err := getTCPHostAddress(daemon)
+	addr, err := getTCPHostAddress(daemon)
 	if err != nil {
-		fmt.Println("Failed to get TCP Host Address")
+		logrus.Error("Failed to get TCP host address")
 		return container.CreatePageServerBody{}, err
 	}
 
-	fmt.Println(host)
+	fmt.Println("Page server created on addr " + addr)
 
 	// TODO: validate s.ListenIP during initialization
 	server, err := phaul.MakePhaulServer(phaul.Config{
-		//Addr: daemon.hosts[0], // not sure about this
-		Addr: "141.212.110.172",
+		Addr: addr,
 		Port: int32(port),
 		Wdir: wdir,
 	})
 	if err != nil {
-		fmt.Println("Failed to make phaul server")
+		logrus.Error("Failed to create phaul server")
 		return container.CreatePageServerBody{}, err
 	}
 
@@ -71,12 +67,24 @@ func (daemon *Daemon) CreatePageServer(ctx context.Context, containerID string) 
 	}, nil
 }
 
-func (daemon *Daemon) StartIter(ctx context.Context, containerID string) (container.IterBody, error) {
+func (daemon *Daemon) StartIter(ctx context.Context, containerID string) error {
 	fmt.Println("Starting iter...")
-	return container.IterBody{}, nil
+	err := daemon.pageServers[containerID].StartIter()
+	if err != nil {
+		logrus.Error("Failed to start page server iter")
+		return err
+	}
+
+	return nil
 }
 
-func (daemon *Daemon) StopIter(ctx context.Context, containerID string) (container.IterBody, error) {
+func (daemon *Daemon) StopIter(ctx context.Context, containerID string) error {
 	fmt.Println("Stopping iter...")
-	return container.IterBody{}, nil
+	err := daemon.pageServers[containerID].StopIter()
+	if err != nil {
+		logrus.Error("Failed to stop page server iter")
+		return err
+	}
+
+	return nil
 }

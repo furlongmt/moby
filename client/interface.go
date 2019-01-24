@@ -204,6 +204,6 @@ type ConfigAPIClient interface {
 // MATT ADDED THIS
 type MigrateAPIClient interface {
 	CreatePageServer(ctx context.Context, containerID string) (container.CreatePageServerBody, error)
-	StartIter(ctx context.Context, containerID string) (container.IterBody, error)
-	StopIter(ctx context.Context, containerID string) (container.IterBody, error)
+	StartIter(ctx context.Context, containerID string) error
+	StopIter(ctx context.Context, containerID string) error
 }

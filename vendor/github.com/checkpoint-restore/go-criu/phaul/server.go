@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/checkpoint-restore/go-criu"
+	"path/filepath"
+
+	criu "github.com/checkpoint-restore/go-criu"
 	"github.com/checkpoint-restore/go-criu/rpc"
 	"github.com/golang/protobuf/proto"
-	"path/filepath"
 )
 
 // Server struct
@@ -37,7 +38,9 @@ func MakePhaulServer(c Config) (*Server, error) {
 func (s *Server) StartIter() error {
 	fmt.Printf("S: start iter\n")
 	psi := rpc.CriuPageServerInfo{
-		Fd: proto.Int32(int32(s.cfg.Memfd)),
+		//Fd: proto.Int32(int32(s.cfg.Memfd)),
+		Address: proto.String(s.cfg.Addr),
+		Port:    proto.Int32(int32(s.cfg.Port)),
 	}
 	opts := rpc.CriuOpts{
 		LogLevel: proto.Int32(4),

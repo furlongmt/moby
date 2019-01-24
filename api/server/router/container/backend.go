@@ -74,8 +74,8 @@ type commitBackend interface {
 // MATT ADDED THIS
 type migrateBackend interface {
 	CreatePageServer(ctx context.Context, containerID string) (container.CreatePageServerBody, error)
-	StartIter(ctx context.Context, containerID string) (container.IterBody, error)
-	StopIter(ctx context.Context, containerID string) (container.IterBody, error)
+	StartIter(ctx context.Context, containerID string) error
+	StopIter(ctx context.Context, containerID string) error
 }
 
 // Backend is all the methods that need to be implemented to provide container specific functionality.

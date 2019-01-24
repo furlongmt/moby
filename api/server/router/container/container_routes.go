@@ -677,3 +677,13 @@ func (s *containerRouter) createPageServer(ctx context.Context, w http.ResponseW
 
 	return httputils.WriteJSON(w, http.StatusOK, pageServer)
 }
+
+func (s *containerRouter) startIter(ctx context.Context, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
+
+	return s.backend.StartIter(ctx, vars["name"])
+}
+
+func (s *containerRouter) stopIter(ctx context.Context, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
+
+	return s.backend.StopIter(ctx, vars["name"])
+}

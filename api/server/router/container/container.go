@@ -34,8 +34,9 @@ func (r *containerRouter) initRoutes() {
 		router.NewHeadRoute("/containers/{name:.*}/archive", r.headContainersArchive),
 		// GET
 		// MATT ADDED THIS
-		//router.NewPostRoute("/containers/{name:.*}/startiter",
 		router.NewGetRoute("/containers/{name:.*}/createpageserver", r.createPageServer),
+		router.NewGetRoute("/containers/{name:.*}/startiter", r.startIter),
+		router.NewGetRoute("/containers/{name:.*}/stopiter", r.stopIter),
 
 		router.NewGetRoute("/containers/json", r.getContainersJSON),
 		router.NewGetRoute("/containers/{name:.*}/export", r.getContainersExport),
