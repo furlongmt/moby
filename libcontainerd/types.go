@@ -6,7 +6,7 @@ import (
 
 	"github.com/containerd/containerd"
 	"github.com/containerd/containerd/cio"
-	"github.com/opencontainers/runtime-spec/specs-go"
+	specs "github.com/opencontainers/runtime-spec/specs-go"
 )
 
 // EventType represents a possible event from libcontainerd
@@ -84,7 +84,7 @@ type Client interface {
 	Status(ctx context.Context, containerID string) (Status, error)
 
 	UpdateResources(ctx context.Context, containerID string, resources *Resources) error
-	CreateCheckpoint(ctx context.Context, containerID, checkpointDir string, exit bool) error
+	CreateCheckpoint(ctx context.Context, containerID, checkpointDir string, exit bool, tcp bool, pageServer string, parentPath string) error
 }
 
 // StdioCallback is called to connect a container or process stdio.

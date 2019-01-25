@@ -565,7 +565,7 @@ func (c *client) Status(ctx context.Context, containerID string) (Status, error)
 	return Status(s.Status), nil
 }
 
-func (c *client) CreateCheckpoint(ctx context.Context, containerID, checkpointDir string, exit bool) error {
+func (c *client) CreateCheckpoint(ctx context.Context, containerID, checkpointDir string, exit bool, tcp bool, pageServer string, parentPath string) error {
 	p, err := c.getProcess(containerID, InitProcessName)
 	if err != nil {
 		return err
