@@ -565,10 +565,12 @@ func (c *client) Status(ctx context.Context, containerID string) (Status, error)
 	return Status(s.Status), nil
 }
 
-func (c *client) CreateCheckpoint(ctx context.Context, containerID, checkpointDir string, exit bool, tcp bool, pageServer string, parentPath string) error {
+// MATT ADDED THIS FUNCTION
+func (c *client) GetCheckpoint(ctx context.Context, containerID string, exit bool, tcp bool, pageServer string, parentPath string) (containerd.Image, error) {
+
 	p, err := c.getProcess(containerID, InitProcessName)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	opts := []containerd.CheckpointTaskOpts{}
@@ -587,8 +589,19 @@ func (c *client) CreateCheckpoint(ctx context.Context, containerID, checkpointDi
 	}
 	img, err := p.(containerd.Task).Checkpoint(ctx, opts...)
 	if err != nil {
-		return wrapError(err)
+		return nil, wrapError(err)
 	}
+
+	return img, err
+}
+
+func (c *client) CreateCheckpoint(ctx context.Context, containerID, checkpointDir string, exit bool, tcp bool, pageServer string, parentPath string) error {
+	// Take the checkpoint here
+	img, err := c.GetCheckpoint(ctx, containerID, exit, tcp, pageServer, parentPath)
+	if err != nil {
+		return err
+	}
+
 	// Whatever happens, delete the checkpoint from containerd
 	defer func() {
 		err := c.client.ImageService().Delete(context.Background(), img.Name())

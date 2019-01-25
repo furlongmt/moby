@@ -84,6 +84,8 @@ type Client interface {
 	Status(ctx context.Context, containerID string) (Status, error)
 
 	UpdateResources(ctx context.Context, containerID string, resources *Resources) error
+	// MATT ADDED THIS
+	GetCheckpoint(ctx context.Context, containerID string, exit bool, tcp bool, pageServer string, parentPath string) (containerd.Image, error)
 	CreateCheckpoint(ctx context.Context, containerID, checkpointDir string, exit bool, tcp bool, pageServer string, parentPath string) error
 }
 
