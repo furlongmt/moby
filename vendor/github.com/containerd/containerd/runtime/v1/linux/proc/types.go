@@ -62,4 +62,5 @@ type CheckpointConfig struct {
 	AllowTerminal            bool
 	FileLocks                bool
 	EmptyNamespaces          []string
+	TCPSkipInFlight          bool
 }

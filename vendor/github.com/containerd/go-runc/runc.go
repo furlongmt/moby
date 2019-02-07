@@ -441,6 +441,9 @@ type CheckpointOpts struct {
 	// EmptyNamespaces creates a namespace for the container but does not save its properties
 	// Provide the namespaces you wish to be checkpointed without their settings on restore
 	EmptyNamespaces []string
+	// TCPSkipInFlight will skip any sockets that are in the three-way handshake but not yet
+	// Fully connected
+	TCPSkipInFlight bool
 }
 
 type CgroupMode string
@@ -481,6 +484,9 @@ func (o *CheckpointOpts) args() (out []string) {
 	}
 	for _, ns := range o.EmptyNamespaces {
 		out = append(out, "--empty-ns", ns)
+	}
+	if o.TCPSkipInFlight {
+		out = append(out, "--skip-in-flight")
 	}
 	return out
 }

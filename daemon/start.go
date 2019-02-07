@@ -167,7 +167,7 @@ func (daemon *Daemon) containerStart(container *container.Container, checkpoint 
 
 	if checkpoint != "" {
 		checkpointDir, err = getCheckpointDir(checkpointDir, checkpoint, container.Name, container.ID, container.CheckpointDir(), false)
-		fmt.Println(checkpointDir)
+		fmt.Println("CheckpointDir is " + string(checkpointDir))
 		if err != nil {
 			return err
 		}

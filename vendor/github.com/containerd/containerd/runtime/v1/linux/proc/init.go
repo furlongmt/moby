@@ -131,9 +131,11 @@ func (p *Init) Create(ctx context.Context, r *CreateConfig) error {
 	if r.Checkpoint != "" {
 		opts := &runc.RestoreOpts{
 			CheckpointOpts: runc.CheckpointOpts{
-				ImagePath:  r.Checkpoint,
-				WorkDir:    p.WorkDir,
-				ParentPath: r.ParentCheckpoint,
+				// MATT ADDED ALLOW OPEN TCP
+				AllowOpenTCP: true,
+				ImagePath:    r.Checkpoint,
+				WorkDir:      p.WorkDir,
+				ParentPath:   r.ParentCheckpoint,
 			},
 			PidFile:     pidFile,
 			IO:          p.io,

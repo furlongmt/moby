@@ -448,6 +448,7 @@ func (s *Service) Checkpoint(ctx context.Context, r *shimapi.CheckpointTaskReque
 		AllowTerminal:            options.Terminal,
 		FileLocks:                options.FileLocks,
 		EmptyNamespaces:          options.EmptyNamespaces,
+		TCPSkipInFlight:          options.TcpSkipInFlight,
 	}); err != nil {
 		return nil, errdefs.ToGRPC(err)
 	}

@@ -296,6 +296,9 @@ func (c *client) Start(ctx context.Context, id, checkpointDir string, withStdin 
 		func(_ context.Context, _ *containerd.Client, info *containerd.TaskInfo) error {
 			info.Checkpoint = cp
 			info.Options = &runctypes.CreateOptions{
+				// TODO: this should be specified in the runc options from daemon/start.go
+				CgroupsMode: "full",
+				OpenTcp:     true,
 				IoUid:       uint32(uid),
 				IoGid:       uint32(gid),
 				NoPivotRoot: os.Getenv("DOCKER_RAMDISK") != "",
@@ -587,6 +590,20 @@ func (c *client) GetCheckpoint(ctx context.Context, containerID string, exit boo
 			return nil
 		})
 	}
+	if tcp {
+		opts = append(opts, func(r *containerd.CheckpointTaskInfo) error {
+			if r.Options == nil {
+				r.Options = &runctypes.CheckpointOptions{
+					OpenTcp: true,
+				}
+			} else {
+				opts, _ := r.Options.(*runctypes.CheckpointOptions)
+				opts.OpenTcp = true
+			}
+			return nil
+		})
+	}
+
 	img, err := p.(containerd.Task).Checkpoint(ctx, opts...)
 	if err != nil {
 		return nil, wrapError(err)
