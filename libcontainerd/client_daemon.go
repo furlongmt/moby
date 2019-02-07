@@ -577,6 +577,20 @@ func (c *client) GetCheckpoint(ctx context.Context, containerID string, exit boo
 	}
 
 	opts := []containerd.CheckpointTaskOpts{}
+
+	// TODO: this should be configurable but for now we'll just set it
+	opts = append(opts, func(r *containerd.CheckpointTaskInfo) error {
+		if r.Options == nil {
+			r.Options = &runctypes.CheckpointOptions{
+				TcpSkipInFlight: true,
+			}
+		} else {
+			opts, _ := r.Options.(*runctypes.CheckpointOptions)
+			opts.TcpSkipInFlight = true
+		}
+		return nil
+	})
+
 	if exit {
 		opts = append(opts, func(r *containerd.CheckpointTaskInfo) error {
 			if r.Options == nil {
