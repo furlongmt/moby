@@ -41,7 +41,7 @@ import (
 	google_protobuf "github.com/gogo/protobuf/types"
 	digest "github.com/opencontainers/go-digest"
 	is "github.com/opencontainers/image-spec/specs-go"
-	"github.com/opencontainers/image-spec/specs-go/v1"
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	specs "github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/pkg/errors"
 )
@@ -415,7 +415,10 @@ func (t *task) Checkpoint(ctx context.Context, opts ...CheckpointTaskOpts) (Imag
 		}
 		request.Options = any
 	}
+	// MATTODO:
 	// make sure we pause it and resume after all other filesystem operations are completed
+	// MATT: remove pause because we want to fork the processes and still have them
+	// run for CoW
 	if err := t.Pause(ctx); err != nil {
 		return nil, err
 	}

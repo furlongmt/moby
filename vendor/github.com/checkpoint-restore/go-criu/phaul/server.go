@@ -94,6 +94,17 @@ func (s *Server) StopIter() error {
 	return nil
 }
 
+// Kill page server
+func (s *Server) KillPageServer() error {
+	err := s.process.Kill()
+	
+	if err != nil {
+		return fmt.Errorf("failed to kill page-server: %s", s)
+	}
+
+	return nil
+}
+
 // Server-local methods
 
 // LastImagesDir function

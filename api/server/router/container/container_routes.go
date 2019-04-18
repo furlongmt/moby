@@ -670,7 +670,7 @@ func (s *containerRouter) postContainersPrune(ctx context.Context, w http.Respon
 
 func (s *containerRouter) createPageServer(ctx context.Context, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
 
-	pageServer, err := s.backend.CreatePageServer(ctx, vars["name"])
+	pageServer, err := s.backend.CreatePageServer(ctx, vars["name"], vars["wdir"])
 	if err != nil {
 		return err
 	}

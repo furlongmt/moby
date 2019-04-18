@@ -618,6 +618,20 @@ func (c *client) GetCheckpoint(ctx context.Context, containerID string, exit boo
 		})
 	}
 
+	if len(pageServer) > 0 {
+		opts = append(opts, func(r *containerd.CheckpointTaskInfo) error {
+			if r.Options == nil {
+				r.Options = &runctypes.CheckpointOptions{
+					PageServer: pageServer,
+				}
+			} else {
+				opts, _ := r.Options.(*runctypes.CheckpointOptions)
+				opts.PageServer = pageServer
+			}
+			return nil
+		})
+	}
+
 	img, err := p.(containerd.Task).Checkpoint(ctx, opts...)
 	if err != nil {
 		return nil, wrapError(err)

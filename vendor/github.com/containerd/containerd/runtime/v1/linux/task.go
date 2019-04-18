@@ -20,6 +20,7 @@ package linux
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/containerd/cgroups"
@@ -281,6 +282,7 @@ func (t *Task) Checkpoint(ctx context.Context, path string, options *types.Any) 
 		Path:    path,
 		Options: options,
 	}
+	fmt.Printf("Calling checkpoint here!\n")
 	if _, err := t.shim.Checkpoint(ctx, r); err != nil {
 		return errdefs.FromGRPC(err)
 	}

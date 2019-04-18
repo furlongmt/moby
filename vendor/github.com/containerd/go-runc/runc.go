@@ -485,9 +485,10 @@ func (o *CheckpointOpts) args() (out []string) {
 	for _, ns := range o.EmptyNamespaces {
 		out = append(out, "--empty-ns", ns)
 	}
-	if o.TCPSkipInFlight {
-		out = append(out, "--skip-in-flight")
-	}
+	// TODO: fix this...
+	//if o.TCPSkipInFlight {
+	out = append(out, "--skip-in-flight")
+	//}
 	return out
 }
 

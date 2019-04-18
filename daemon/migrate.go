@@ -5,7 +5,6 @@ package daemon
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net"
 
 	"github.com/checkpoint-restore/go-criu/phaul"
@@ -27,23 +26,21 @@ func getTCPHostAddress(daemon *Daemon) (string, error) {
 	return "", errors.New("No tcp host found in docker daemon!")
 }
 
-func (daemon *Daemon) CreatePageServer(ctx context.Context, containerID string) (container.CreatePageServerBody, error) {
+func (daemon *Daemon) CreatePageServer(ctx context.Context, containerID string, wdir string) (container.CreatePageServerBody, error) {
 	fmt.Println("Creating page server...")
 	// TODO: hard-coded port number
 	port := uint32(6245)
-	wdir, err := ioutil.TempDir("", "ctrd-pageserver-workdir")
+	/*wdir, err := ioutil.TempDir("", "ctrd-pageserver-workdir")
 	if err != nil {
 		logrus.Error("Failed to crate tmp dir for page server")
 		return container.CreatePageServerBody{}, err
-	}
+	}*/
 
 	addr, err := getTCPHostAddress(daemon)
 	if err != nil {
 		logrus.Error("Failed to get TCP host address")
 		return container.CreatePageServerBody{}, err
 	}
-
-	fmt.Println("Page server created on addr " + addr)
 
 	// TODO: validate s.ListenIP during initialization
 	server, err := phaul.MakePhaulServer(phaul.Config{
@@ -58,9 +55,23 @@ func (daemon *Daemon) CreatePageServer(ctx context.Context, containerID string) 
 
 	if daemon.pageServers == nil {
 		daemon.pageServers = make(map[string]*phaul.Server)
+	}	
+
+	_, ok := daemon.pageServers[containerID]
+
+	if ok { // if we previously had a page server for this container id
+		logrus.Debugf("Deleting %v from map and killing page server", containerID)
+		err = daemon.pageServers[containerID].KillPageServer()
+		if err != nil {
+			logrus.Error("Failed to kill previous page server!")
+			return container.CreatePageServerBody{}, err
+		}
+		delete(daemon.pageServers, containerID)	
 	}
 
 	daemon.pageServers[containerID] = server
+
+	logrus.Debugf("Page server created on addr " + addr)
 
 	return container.CreatePageServerBody{
 		Port: port,
@@ -68,7 +79,7 @@ func (daemon *Daemon) CreatePageServer(ctx context.Context, containerID string) 
 }
 
 func (daemon *Daemon) StartIter(ctx context.Context, containerID string) error {
-	fmt.Println("Starting iter...")
+	logrus.Debugf("Starting iter...")
 	err := daemon.pageServers[containerID].StartIter()
 	if err != nil {
 		logrus.Error("Failed to start page server iter")
@@ -79,7 +90,7 @@ func (daemon *Daemon) StartIter(ctx context.Context, containerID string) error {
 }
 
 func (daemon *Daemon) StopIter(ctx context.Context, containerID string) error {
-	fmt.Println("Stopping iter...")
+	logrus.Debugf("Stopping iter...")
 	err := daemon.pageServers[containerID].StopIter()
 	if err != nil {
 		logrus.Error("Failed to stop page server iter")

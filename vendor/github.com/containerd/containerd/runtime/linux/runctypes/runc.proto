@@ -36,6 +36,7 @@ message CheckpointOptions {
 	repeated string empty_namespaces = 6;
 	string cgroups_mode = 7;
     bool tcp_skip_in_flight = 8;
+    string page_server = 9;
 }
 
 message ProcessDetails {

@@ -3,15 +3,15 @@ package phaul
 import (
 	"fmt"
 
-	"github.com/checkpoint-restore/go-criu"
+	criu "github.com/checkpoint-restore/go-criu"
 	"github.com/checkpoint-restore/go-criu/rpc"
 	"github.com/checkpoint-restore/go-criu/stats"
 	"github.com/golang/protobuf/proto"
 )
 
-const minPagesWritten uint64 = 64
-const maxIters int = 8
-const maxGrowDelta int64 = 32
+const minPagesWritten uint64 = 64 // minimum number of dumped pages to continue iteration
+const maxIters int = 8            // maximum number of iterations
+const maxGrowDelta float64 = 10   // maximum acceptable growth rate in percentage
 
 // Client struct
 type Client struct {
@@ -30,21 +30,32 @@ func MakePhaulClient(l Local, r Remote, c Config) (*Client, error) {
 	return &Client{local: l, remote: r, cfg: c}, nil
 }
 
+func calcGrowRate(value int64, prevValue int64) float64 {
+	delta := value - prevValue
+	return float64(delta) * 100 / float64(prevValue)
+}
+
 func isLastIter(iter int, stats *stats.DumpStatsEntry, prevStats *stats.DumpStatsEntry) bool {
+
+	// we should check to make sure we have some previous stats first
+	if prevStats.GetPagesWritten() == uint64(0) {
+		return false
+	}
+
 	if iter >= maxIters {
-		fmt.Printf("`- max iters reached\n")
+		fmt.Printf("`- max iters reached, iter (%d)\n", iter)
 		return true
 	}
 
 	pagesWritten := stats.GetPagesWritten()
 	if pagesWritten < minPagesWritten {
-		fmt.Printf("`- tiny pre-dump (%d) reached\n", int(pagesWritten))
+		fmt.Printf("`- tiny pre-dump (%d) reached, iter (%d)\n", iter, int(pagesWritten))
 		return true
 	}
 
-	pagesDelta := int64(pagesWritten) - int64(prevStats.GetPagesWritten())
+	pagesDelta := calcGrowRate(int64(pagesWritten), int64(prevStats.GetPagesWritten()))
 	if pagesDelta >= maxGrowDelta {
-		fmt.Printf("`- grow iter (%d) reached\n", int(pagesDelta))
+		fmt.Printf("`- grow iter (%d) reached, iter(%d)\n", iter, int(pagesDelta))
 		return true
 	}
 
@@ -56,7 +67,7 @@ func (pc *Client) Migrate() error {
 	criu := criu.MakeCriu()
 	psi := rpc.CriuPageServerInfo{
 		Address: proto.String(pc.cfg.Addr),
-		Port: proto.Int32(int32(pc.cfg.Port)), 
+		Port:    proto.Int32(int32(pc.cfg.Port)),
 	}
 	opts := rpc.CriuOpts{
 		Pid:      proto.Int32(int32(pc.cfg.Pid)),
@@ -79,44 +90,46 @@ func (pc *Client) Migrate() error {
 	prevStats := &stats.DumpStatsEntry{}
 	iter := 0
 
-	for {
-		err = pc.remote.StartIter()
-		if err != nil {
-			return err
-		}
+	if pc.cfg.PreDump {
+		for {
+			err = pc.remote.StartIter()
+			if err != nil {
+				return err
+			}
 
-		prevP := imgs.lastImagesDir()
-		imgDir, err := imgs.openNextDir()
-		if err != nil {
-			return err
-		}
+			prevP := imgs.lastImagesDir()
+			imgDir, err := imgs.openNextDir()
+			if err != nil {
+				return err
+			}
 
-		opts.ImagesDirFd = proto.Int32(int32(imgDir.Fd()))
-		if prevP != "" {
-			opts.ParentImg = proto.String(prevP)
-		}
+			opts.ImagesDirFd = proto.Int32(int32(imgDir.Fd()))
+			if prevP != "" {
+				opts.ParentImg = proto.String(prevP)
+			}
 
-		err = criu.PreDump(opts, nil)
-		imgDir.Close()
-		if err != nil {
-			return err
-		}
+			err = criu.PreDump(opts, nil)
+			imgDir.Close()
+			if err != nil {
+				return err
+			}
 
-		err = pc.remote.StopIter()
-		if err != nil {
-			return err
-		}
+			err = pc.remote.StopIter()
+			if err != nil {
+				return err
+			}
 
-		st, err := criuGetDumpStats(imgDir)
-		if err != nil {
-			return err
-		}
+			st, err := criuGetDumpStats(imgDir)
+			if err != nil {
+				return err
+			}
 
-		if isLastIter(iter, st, prevStats) {
-			break
-		}
+			if isLastIter(iter, st, prevStats) {
+				break
+			}
 
-		prevStats = st
+			prevStats = st
+		}
 	}
 
 	err = pc.remote.StartIter()

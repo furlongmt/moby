@@ -428,6 +428,7 @@ func (s *Service) CloseIO(ctx context.Context, r *shimapi.CloseIORequest) (*ptyp
 
 // Checkpoint the container
 func (s *Service) Checkpoint(ctx context.Context, r *shimapi.CheckpointTaskRequest) (*ptypes.Empty, error) {
+	fmt.Println("Checkpoint in service!")
 	p, err := s.getInitProcess()
 	if err != nil {
 		return nil, err
@@ -440,6 +441,7 @@ func (s *Service) Checkpoint(ctx context.Context, r *shimapi.CheckpointTaskReque
 		}
 		options = *v.(*runctypes.CheckpointOptions)
 	}
+	fmt.Println(options)
 	if err := p.(*proc.Init).Checkpoint(ctx, &proc.CheckpointConfig{
 		Path:                     r.Path,
 		Exit:                     options.Exit,
@@ -448,7 +450,9 @@ func (s *Service) Checkpoint(ctx context.Context, r *shimapi.CheckpointTaskReque
 		AllowTerminal:            options.Terminal,
 		FileLocks:                options.FileLocks,
 		EmptyNamespaces:          options.EmptyNamespaces,
-		TCPSkipInFlight:          options.TcpSkipInFlight,
+		// TODO: MATT ADDED THIS
+		TCPSkipInFlight: true,
+		PageServer:      options.PageServer,
 	}); err != nil {
 		return nil, errdefs.ToGRPC(err)
 	}

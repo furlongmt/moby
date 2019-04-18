@@ -63,4 +63,6 @@ type CheckpointConfig struct {
 	FileLocks                bool
 	EmptyNamespaces          []string
 	TCPSkipInFlight          bool
+	// MATT ADDED THIS
+	PageServer string
 }

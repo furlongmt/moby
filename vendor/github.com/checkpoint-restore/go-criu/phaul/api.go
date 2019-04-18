@@ -9,14 +9,20 @@ import (
 // Pid is what we migrate
 // Memfd is the file descriptor via which criu can transfer memory pages.
 // Wdir is the directory where phaul can put images and other stuff
-// Port is the port of the Docker daemon
+// Port is the port of the page server on the remote machine
 // Address is the ip address of the Docker daemon
+// Exit determines whether or not we want to exit after checkpoint
+// OpenTCP determines whether to checkpoint open tcp sockets
+// PreDump determines whether or not to pre-dump before checkpointing
 type Config struct {
-	Pid   int
-	Memfd int
-	Port  int32
-	Addr  string
-	Wdir  string
+	Pid     int
+	Memfd   int
+	Port    int32
+	Addr    string
+	Wdir    string
+	Exit    bool
+	OpenTcp bool
+	PreDump bool
 }
 
 // Remote interface

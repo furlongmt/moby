@@ -9,10 +9,10 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
-func (cli *Client) CreatePageServer(ctx context.Context, containerID string) (container.CreatePageServerBody, error) {
+func (cli *Client) CreatePageServer(ctx context.Context, containerID string, wdir string) (container.CreatePageServerBody, error) {
 	var response container.CreatePageServerBody
 
-	serverResp, err := cli.get(ctx, "/containers/"+containerID+"/createpageserver", nil, nil)
+	serverResp, err := cli.get(ctx, "/containers/"+containerID+"/createpageserver/"+wdir, nil, nil)
 
 	if err != nil {
 		return response, err
