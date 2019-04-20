@@ -617,7 +617,21 @@ func (c *client) GetCheckpoint(ctx context.Context, containerID string, exit boo
 			return nil
 		})
 	}
+	if len(parentPath) > 0 {
+		opts = append(opts, func(r *containerd.CheckpointTaskInfo) error {
+			if r.Options == nil {
+				r.Options = &runctypes.CheckpointOptions{
+					ParentPath: parentPath,
+				}
+			} else {
+				opts, _ := r.Options.(*runctypes.CheckpointOptions)
+				opts.ParentPath = parentPath
+			}
+			return nil
+		})
+	}
 
+	// TODO: Make this work...
 	if len(pageServer) > 0 {
 		opts = append(opts, func(r *containerd.CheckpointTaskInfo) error {
 			if r.Options == nil {

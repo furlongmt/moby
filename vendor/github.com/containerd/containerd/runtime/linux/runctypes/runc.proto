@@ -37,6 +37,7 @@ message CheckpointOptions {
 	string cgroups_mode = 7;
     bool tcp_skip_in_flight = 8;
     string page_server = 9;
+    string parent_path = 10;
 }
 
 message ProcessDetails {

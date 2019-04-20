@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
 
 	"github.com/checkpoint-restore/go-criu/phaul"
 	"github.com/docker/docker/api/types/container"
@@ -30,11 +31,8 @@ func (daemon *Daemon) CreatePageServer(ctx context.Context, containerID string, 
 	fmt.Println("Creating page server...")
 	// TODO: hard-coded port number
 	port := uint32(6245)
-	/*wdir, err := ioutil.TempDir("", "ctrd-pageserver-workdir")
-	if err != nil {
-		logrus.Error("Failed to crate tmp dir for page server")
-		return container.CreatePageServerBody{}, err
-	}*/
+	// ignore errors cause either way we're making the dir
+	_ = os.Mkdir(wdir, os.ModeDir)
 
 	addr, err := getTCPHostAddress(daemon)
 	if err != nil {
@@ -55,7 +53,7 @@ func (daemon *Daemon) CreatePageServer(ctx context.Context, containerID string, 
 
 	if daemon.pageServers == nil {
 		daemon.pageServers = make(map[string]*phaul.Server)
-	}	
+	}
 
 	_, ok := daemon.pageServers[containerID]
 
@@ -66,7 +64,7 @@ func (daemon *Daemon) CreatePageServer(ctx context.Context, containerID string, 
 			logrus.Error("Failed to kill previous page server!")
 			return container.CreatePageServerBody{}, err
 		}
-		delete(daemon.pageServers, containerID)	
+		delete(daemon.pageServers, containerID)
 	}
 
 	daemon.pageServers[containerID] = server
@@ -97,5 +95,10 @@ func (daemon *Daemon) StopIter(ctx context.Context, containerID string) error {
 		return err
 	}
 
+	return nil
+}
+
+func (daemon *Daemon) MergeImages(ctx context.Context, containerId, dumpDir, lastDumpDir string) error {
+	logrus.Debugf("Merging last dump dir %s into dump dir %s\n", lastDumpDir, dumpDir)
 	return nil
 }

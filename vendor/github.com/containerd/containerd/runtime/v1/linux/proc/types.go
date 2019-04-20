@@ -65,4 +65,5 @@ type CheckpointConfig struct {
 	TCPSkipInFlight          bool
 	// MATT ADDED THIS
 	PageServer string
+	ParentPath string
 }

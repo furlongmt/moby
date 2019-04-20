@@ -37,11 +37,6 @@ func calcGrowRate(value int64, prevValue int64) float64 {
 
 func isLastIter(iter int, stats *stats.DumpStatsEntry, prevStats *stats.DumpStatsEntry) bool {
 
-	// we should check to make sure we have some previous stats first
-	if prevStats.GetPagesWritten() == uint64(0) {
-		return false
-	}
-
 	if iter >= maxIters {
 		fmt.Printf("`- max iters reached, iter (%d)\n", iter)
 		return true
@@ -53,10 +48,14 @@ func isLastIter(iter int, stats *stats.DumpStatsEntry, prevStats *stats.DumpStat
 		return true
 	}
 
-	pagesDelta := calcGrowRate(int64(pagesWritten), int64(prevStats.GetPagesWritten()))
-	if pagesDelta >= maxGrowDelta {
-		fmt.Printf("`- grow iter (%d) reached, iter(%d)\n", iter, int(pagesDelta))
-		return true
+	prevPagesWritten := prevStats.GetPagesWritten()
+	if prevPagesWritten != 0 { // not empty
+
+		pagesDelta := calcGrowRate(int64(pagesWritten), int64(prevPagesWritten))
+		if pagesDelta > maxGrowDelta {
+			fmt.Printf("`- grow iter (%d) reached, iter(%d)\n", iter, int(pagesDelta))
+			return true
+		}
 	}
 
 	return false
@@ -65,6 +64,8 @@ func isLastIter(iter int, stats *stats.DumpStatsEntry, prevStats *stats.DumpStat
 // Migrate function
 func (pc *Client) Migrate() error {
 	criu := criu.MakeCriu()
+	prevP := ""
+
 	psi := rpc.CriuPageServerInfo{
 		Address: proto.String(pc.cfg.Addr),
 		Port:    proto.Int32(int32(pc.cfg.Port)),
@@ -97,7 +98,7 @@ func (pc *Client) Migrate() error {
 				return err
 			}
 
-			prevP := imgs.lastImagesDir()
+			prevP = imgs.lastImagesDir()
 			imgDir, err := imgs.openNextDir()
 			if err != nil {
 				return err
@@ -129,6 +130,7 @@ func (pc *Client) Migrate() error {
 			}
 
 			prevStats = st
+			iter++
 		}
 	}
 

@@ -444,6 +444,7 @@ func (p *Init) checkpoint(ctx context.Context, r *CheckpointConfig) error {
 		// TODO
 		TCPSkipInFlight: true,
 		CriuPageServer:  r.PageServer,
+		ParentPath:      r.ParentPath,
 	}, actions...); err != nil {
 		dumpLog := filepath.Join(p.Bundle, "criu-dump.log")
 		fmt.Println(dumpLog)
