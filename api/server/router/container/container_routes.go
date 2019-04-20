@@ -690,5 +690,10 @@ func (s *containerRouter) stopIter(ctx context.Context, w http.ResponseWriter, r
 
 func (s *containerRouter) mergeImages(ctx context.Context, w http.ResponseWriter, r *http.Request, vars map[string]string) error {
 
-	return s.backend.MergeImages(ctx, vars["name"], vars["dumpDir"], vars["lastDumpDir"])
+	dir, err := s.backend.MergeImages(ctx, vars["name"], vars["dumpDir"])
+	if err != nil {
+		return err
+	}
+
+	return httputils.WriteJSON(w, http.StatusOK, dir)
 }

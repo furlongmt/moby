@@ -40,8 +40,8 @@ func (cli *Client) StopIter(ctx context.Context, containerID string) error {
 	return err
 }
 
-func (cli *Client) MergeImages(ctx context.Context, containerId, dumpDir, lastDumpDir string) error {
-	serverResp, err := cli.get(ctx, "/containers/"+containerID+"/mergeimages/"+dumpDir+"/"+lastDumpDir, nil, nil)
+func (cli *Client) MergeImages(ctx context.Context, containerID, dumpDir string) error {
+	serverResp, err := cli.get(ctx, "/containers/"+containerID+"/mergeimages/"+dumpDir, nil, nil)
 
 	ensureReaderClosed(serverResp)
 	return err

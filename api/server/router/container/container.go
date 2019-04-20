@@ -37,6 +37,7 @@ func (r *containerRouter) initRoutes() {
 		router.NewGetRoute("/containers/{name:.*}/createpageserver/{wdir:.*}", r.createPageServer),
 		router.NewGetRoute("/containers/{name:.*}/startiter", r.startIter),
 		router.NewGetRoute("/containers/{name:.*}/stopiter", r.stopIter),
+		router.NewGetRoute("/containers/{name:.*}/mergeimages/{dumpDir:.*}", r.mergeImages),
 
 		router.NewGetRoute("/containers/json", r.getContainersJSON),
 		router.NewGetRoute("/containers/{name:.*}/export", r.getContainersExport),

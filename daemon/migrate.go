@@ -5,8 +5,11 @@ package daemon
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"os"
+	"strings"
+	"syscall"
 
 	"github.com/checkpoint-restore/go-criu/phaul"
 	"github.com/docker/docker/api/types/container"
@@ -31,8 +34,11 @@ func (daemon *Daemon) CreatePageServer(ctx context.Context, containerID string, 
 	fmt.Println("Creating page server...")
 	// TODO: hard-coded port number
 	port := uint32(6245)
-	// ignore errors cause either way we're making the dir
-	_ = os.Mkdir(wdir, os.ModeDir)
+	wdir, err := ioutil.TempDir("", "ctrd-pageserver-workdir")
+	if err != nil {
+		logrus.Error("Failed to crate tmp dir for page server")
+		return container.CreatePageServerBody{}, err
+	}
 
 	addr, err := getTCPHostAddress(daemon)
 	if err != nil {
@@ -62,7 +68,7 @@ func (daemon *Daemon) CreatePageServer(ctx context.Context, containerID string, 
 		err = daemon.pageServers[containerID].KillPageServer()
 		if err != nil {
 			logrus.Error("Failed to kill previous page server!")
-			return container.CreatePageServerBody{}, err
+			//return container.CreatePageServerBody{}, err
 		}
 		delete(daemon.pageServers, containerID)
 	}
@@ -98,7 +104,39 @@ func (daemon *Daemon) StopIter(ctx context.Context, containerID string) error {
 	return nil
 }
 
-func (daemon *Daemon) MergeImages(ctx context.Context, containerId, dumpDir, lastDumpDir string) error {
-	logrus.Debugf("Merging last dump dir %s into dump dir %s\n", lastDumpDir, dumpDir)
-	return nil
+// TODO: this should really just be a restore really
+func (daemon *Daemon) MergeImages(ctx context.Context, containerId, dumpDir string) (container.MergeImagesBody, error) {
+	// probably don't need last dump dir to be passed in here...
+	logrus.Debugf("IN MERGE \n\n")
+	lastPreDumpDir := daemon.pageServers[containerId].LastImagesDir()
+	// TODO: hacky...
+	dumpDir = "/" + dumpDir // since it's tmp
+	logrus.Debugf("MergeImages: dumpDir - " + dumpDir + " lastDumpDir - " + lastPreDumpDir)
+	idir, err := os.Open(dumpDir)
+	if err != nil {
+		return container.MergeImagesBody{}, err
+	}
+
+	defer idir.Close()
+
+	imgs, err := idir.Readdirnames(0)
+	if err != nil {
+		return container.MergeImagesBody{}, err
+	}
+
+	for _, fname := range imgs {
+		if !strings.HasSuffix(fname, ".img") {
+			continue
+		}
+
+		fmt.Printf("\t%s -> %s/\n", fname, lastPreDumpDir)
+		err = syscall.Link(dumpDir+"/"+fname, lastPreDumpDir+"/"+fname)
+		if err != nil {
+			return container.MergeImagesBody{}, err
+		}
+	}
+
+	return container.MergeImagesBody{
+		Dir: lastPreDumpDir,
+	}, err
 }

@@ -76,7 +76,7 @@ type migrateBackend interface {
 	CreatePageServer(ctx context.Context, containerID string, wdir string) (container.CreatePageServerBody, error)
 	StartIter(ctx context.Context, containerID string) error
 	StopIter(ctx context.Context, containerID string) error
-	MergeImages(ctx context.Context, containerId, dumpDir, lastDumpDir string) error
+	MergeImages(ctx context.Context, containerId, dumpDir string) (container.MergeImagesBody, error)
 }
 
 // Backend is all the methods that need to be implemented to provide container specific functionality.
