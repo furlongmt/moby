@@ -40,9 +40,15 @@ func (cli *Client) StopIter(ctx context.Context, containerID string) error {
 	return err
 }
 
-func (cli *Client) MergeImages(ctx context.Context, containerID, dumpDir string) error {
-	serverResp, err := cli.get(ctx, "/containers/"+containerID+"/mergeimages/"+dumpDir, nil, nil)
+func (cli *Client) MergeImages(ctx context.Context, containerID, dumpDir string) (container.MergeImagesBody, error) {
+	var response container.MergeImagesBody
 
+	serverResp, err := cli.get(ctx, "/containers/"+containerID+"/mergeimages/"+dumpDir, nil, nil)
+	if err != nil {
+		return response, err
+	}
+
+	err = json.NewDecoder(serverResp.body).Decode(&response)
 	ensureReaderClosed(serverResp)
-	return err
+	return response, err
 }
